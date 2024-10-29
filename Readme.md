@@ -7,3 +7,5 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
 - Whenever we have to use middleware or configure something then we use
   'app.use()'
   e.g, app.use(cors())
+
+- Read about 'bson data'
