@@ -34,3 +34,10 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
 
 - **fs in nodejs** : fs (File System) module is a built-in module that allows you to interact with the file system in a way that is both synchronous and asynchronous. This module provides APIs to read, write, update, delete, and manipulate files and directories on your system.
   Node.js also provides stream-based APIs for reading and writing large files efficiently without loading the entire file into memory.
+
+- **HTTP STATUS CODE** :
+  - 1xx : Informational responses
+  - 2xx : Success responses
+  - 3xx : Redirection messages
+  - 4xx : Client error responses
+  - 5xx : Server error responses
