@@ -11,11 +11,13 @@ dotenv.config({
 
 connectDB()
   .then(() => {
+    // app.on: Listens for events on the app (or its underlying EventEmitter).
     app.on("error: ", (err) => {
       console.log("Error: ", err);
       throw err;
     });
 
+    // app.listen: Starts the HTTP server and binds it to a specific port.
     app.listen(PORT_NUMBER, () => {
       console.log(`Server is running at port: ${PORT_NUMBER}`);
     });

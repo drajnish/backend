@@ -55,14 +55,19 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// methods is an object in which we can inject as many method as we want in our schema
 userSchema.methods.isPasswordCorrect = async function (password) {
   // it will returns true or false
   return await bcrypt.compare(password, this.password);
 };
 
+// assign a function to the "methods" object of our userSchema
 userSchema.methods.generateAccessToken = function () {
+  // jwt.sign() is a method from the jsonwebtoken library used to create a JSON Web Token (JWT). It takes three main arguments
+  // 1. payload 2. Secret 3. Options{ algorithm(default is HS256), expiresIn, notBefore etc.}
   return jwt.sign(
     {
+      // payload to store in jwt token
       _id: this._id,
       email: this.email,
       userName: this.userName,
@@ -74,6 +79,8 @@ userSchema.methods.generateAccessToken = function () {
     }
   );
 };
+
+// refresh token has less information
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
