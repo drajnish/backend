@@ -29,3 +29,8 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
   The information can be verified and trusted because it is digitally signed. JWTs are often used to represent claims or pieces of data, such as a user's identity or authorization status, in a way that can be verified and trusted by the recipient.
 
   A **JSON Web Token (JWT) is a bearer token**, meaning that anyone possessing this token can access the associated data. In other words, the token grants access to the data without requiring additional authentication or verification, as long as the token itself is valid.
+
+- **To upload file** : We will first use Multer to upload the file to our local server. Then, we'll take that file from our server and upload it to Cloudinary. This way, if any error happens during the upload to Cloudinary, we will still have the file stored locally and can try uploading it again.
+
+- **fs in nodejs** : fs (File System) module is a built-in module that allows you to interact with the file system in a way that is both synchronous and asynchronous. This module provides APIs to read, write, update, delete, and manipulate files and directories on your system.
+  Node.js also provides stream-based APIs for reading and writing large files efficiently without loading the entire file into memory.
