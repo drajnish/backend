@@ -24,6 +24,8 @@ app.use(cookieParser());
 import userRouter from "./routes/user.route.js";
 
 // routes declaration
+// here we cannot use app.get() because we seperate the routes and controllers so we need middleware
 app.use("/api/v1/users", userRouter);
 
+// http://localhost:8000/api/v1/users/register
 export { app };

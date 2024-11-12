@@ -7,8 +7,14 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
 - Whenever we have to use middleware or configure something then we use 'app.use()'
   e.g, app.use(cors())
 
-  When you "mount" middleware, you are telling your app to use a specific function or functions for a certain part of your website, like a specific URL.So, if a request comes in and the beginning of the requested URL matches the specified path, the middleware will be executed. If it doesn’t match, that middleware won’t run.
-  This helps you organize your code and apply different behaviors depending on the URL.
+  - .use() is a method used to define middleware functions that can intercept requests and perform actions before passing control to the next middleware or the route handler.
+
+    - **Global Middleware**: When you use .use() without specifying a route, it will apply the middleware to all incoming requests.
+    - **Route-Specific Middleware**: You can also pass a route path as the first argument to .use(), making the middleware apply only to requests that match that path.
+
+              When you "mount" middleware, you are telling your app to use a specific function or functions for a certain part of your website, like a specific URL.So, if a request comes in and the beginning of the requested URL matches the specified path, the middleware will be executed. If it doesn’t match, that middleware won’t run.
+
+      This helps you organize your code and apply different behaviors depending on the URL.
 
 - About '**BSON data**' :
 
