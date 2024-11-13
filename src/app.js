@@ -16,6 +16,12 @@ app.use(express.json({ limit: "16kb" }));
 // configuration for url encoding
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 // to store public files and folders
+/**
+ * express.static is a built-in middleware function in Express that serves static files,
+ * such as HTML files, CSS stylesheets, JavaScript files, images, and other assets.
+ * When you pass "public" to express.static(),
+ * Express will serve files from the public directory relative to your project's root directory.
+ */
 app.use(express.static("public"));
 // to perform crud operation in cookies
 app.use(cookieParser());

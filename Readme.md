@@ -31,19 +31,36 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
 | Data Types        | JSON has a specific set of data types—string, boolean, number for numeric data types, array, object, and null. | Unlike JSON, BSON offers additional data types such as bindata for binary data, decimal128 for numeric. |
 | Usage             | Used to send data through the network (mostly through APIs).                                                   | Databases use BSON to store data.                                                                       |
 
-- **JWT(jessonwebtoken)**: A JSON Web Token (JWT) is an open standard for securely transmitting information between parties as a JSON object.
-  The information can be verified and trusted because it is digitally signed. JWTs are often used to represent claims or pieces of data, such as a user's identity or authorization status, in a way that can be verified and trusted by the recipient.
-
-  A **JSON Web Token (JWT) is a bearer token**, meaning that anyone possessing this token can access the associated data. In other words, the token grants access to the data without requiring additional authentication or verification, as long as the token itself is valid.
-
 - **To upload file** : We will first use Multer to upload the file to our local server. Then, we'll take that file from our server and upload it to Cloudinary. This way, if any error happens during the upload to Cloudinary, we will still have the file stored locally and can try uploading it again.
 
 - **fs in nodejs** : fs (File System) module is a built-in module that allows you to interact with the file system in a way that is both synchronous and asynchronous. This module provides APIs to read, write, update, delete, and manipulate files and directories on your system.
   Node.js also provides stream-based APIs for reading and writing large files efficiently without loading the entire file into memory.
 
 - **HTTP STATUS CODE** :
+
   - 1xx : Informational responses
   - 2xx : Success responses
   - 3xx : Redirection messages
   - 4xx : Client error responses
   - 5xx : Server error responses
+
+- **JWT(jessonwebtoken)**: A JSON Web Token (JWT) is an open standard for securely transmitting information between parties as a JSON object.
+  The information can be verified and trusted because it is digitally signed. JWTs are often used to represent claims or pieces of data, such as a user's identity or authorization status, in a way that can be verified and trusted by the recipient.
+
+  A **JSON Web Token (JWT) is a bearer token**, meaning that anyone possessing this token can access the associated data. In other words, the token grants access to the data without requiring additional authentication or verification, as long as the token itself is valid.
+
+- **Access Token** :
+
+  - short lifespan
+  - validates the user using access token but it is not stored in database.
+  - is a credential that grants access to protected resources or APIs on behalf of an authenticated user. It is issued after successful authentication and authorization, and typically used for short-lived, session-based access.
+  - The server validates the access token by verifying its signature (in the case of JWTs), checking its expiration, and validating claims like the issuer and audience.
+
+- **Refresh Token** :
+  - longer lifespan
+  - stored in database and given to client as well
+  - Refresh tokens should be securely stored on the client-side, preferably in secure HTTP-only cookies or local storage, to reduce the risk of theft.
+  - When the access token expires and the user attempts to perform an action that requires authorization, if a valid refresh token is available, the user won't need to log in again. Instead, they can simply request a new access token by hitting the appropriate endpoint.
+  - Refresh tokens can be revoked by the server, requiring users to re-authenticate if the refresh token is invalidated (e.g., due to a password change or logout).
+
+[!NOTE] read about Stateless Authentication
