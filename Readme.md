@@ -64,3 +64,5 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
   - Refresh tokens can be revoked by the server, requiring users to re-authenticate if the refresh token is invalidated (e.g., due to a password change or logout).
 
 [!NOTE] read about Stateless Authentication
+
+- Learn about mongodb operators
