@@ -1,7 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import fs from "fs";
 import jwt from "jsonwebtoken";
@@ -318,7 +321,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
@@ -338,6 +341,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while uploading avatar.");
   }
 
+  // TODO: Create a utility to delete lold avatar image from cloudinary
+  const oldAvatar = await User.findById(req.user?._id).select("avatar");
+  const oldAvatarPublicId = await oldAvatar.split("/").pop().split(".")[0];
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -346,7 +353,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
+
+  await deleteFromCloudinary(oldAvatarPublicId);
 
   return res
     .status(200)
@@ -366,6 +375,13 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while uploading cover image.");
   }
 
+  // TODO: Create a utility to delete old cover image from cloudinary
+  const oldCoverImage = await User.findById(req.user?._id).select("coverImage");
+  const oldCoverImagePublicId = await oldCoverImage
+    .split("/")
+    .pop()
+    .split(".")[0];
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -374,11 +390,89 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
+
+  await deleteFromCloudinary(oldCoverImagePublicId);
 
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Cover Image updated successfully."));
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { userName } = req.params;
+
+  if (!userName?.trim()) {
+    throw new ApiError(400, "Username is missing.");
+  }
+
+  // aggregate returns data in the form of an array and can have multiple object
+  const channel = await User.aggregate([
+    {
+      $match: {
+        userName: userName?.toLowerCase(),
+      },
+    },
+    {
+      // This combines all documents from one collection(user) with matching documents from the other collection(subscriptions).
+      $lookup: {
+        from: "subscriptions",
+        foreignField: "channel",
+        localField: "_id",
+        as: "subscribers", //adds a field named subscribers in user document
+      },
+    },
+    {
+      $lookup: {
+        from: "subcriptions",
+        foreignField: "subscriber",
+        localField: "_id",
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers", // because new field returns an array so we need size of the field
+        },
+        channelsSubscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          // $cond requires 3 parameters (if, then, else)
+          $cond: {
+            // $in : [whatToCheck, whereToCheck] , it can check in array and object as well
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      // it will project selected values which are defined
+      $project: {
+        fullName: 1,
+        userName: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel does not exists.");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully.")
+    );
 });
 
 export {
@@ -391,4 +485,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
+  getUserChannelProfile,
 };
