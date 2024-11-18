@@ -475,6 +475,68 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+  // req.user?._id -> it will return a string and not the mongodbId
+  // to convert this string to mongodbId we need to use ObjectId('string')
+  // but we use mongoose which converts string to id bechind the scene
+  const user = await User.aggregate([
+    {
+      $match: {
+        // here we need to convert string into mongodbId because in aggregation every thing goes as it is
+        // mongoose didn't convert it behind the scene
+        _id: new mongoose.Types.ObjectId(req.user?._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        foreignField: "_id", //"<field-in-from-collection>", source is videos in this case,
+        localField: "watchHistory", //"<field-in-source-messages>", source is user in this case,
+        as: "watchHistory", //"<output-array-field>", name anything you want
+        // Specifies the pipeline to run on the joined collection.
+        pipeline: [
+          // here we are inside the video field
+          {
+            $lookup: {
+              from: "users",
+              foreignField: "_id",
+              localField: "owner",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    userName: 1,
+                    avatar: 1,
+                  },
+                },
+                // The $addFields stage is equivalent to a $project stage
+                // that explicitly specifies all existing fields in the input documents and adds the new fields.
+              ],
+            },
+          },
+          {
+            $addFields: {
+              //Adds new fields to documents.
+              owner: {
+                $first: "$owner", //here owner is a field and $first will returns the first element from owner array.
+                // $arrayElemAt: ["$owner", 0] // alternate to above line
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0].watchHistory),
+      "Watch history fetched successfully."
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -486,4 +548,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  getWatchHistory,
 };
