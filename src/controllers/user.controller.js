@@ -211,8 +211,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1, //this removes the field from document
       },
     },
     {
@@ -262,7 +262,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
+    // if we try to destructure directly newRefreshToken it will respond as undefined
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
 
     return res
@@ -343,7 +344,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   // TODO: Create a utility to delete lold avatar image from cloudinary
   const oldAvatar = await User.findById(req.user?._id).select("avatar");
-  const oldAvatarPublicId = await oldAvatar.split("/").pop().split(".")[0];
+
+  const oldAvatarPublicId = await oldAvatar?.avatar
+    ?.split("/")
+    ?.pop()
+    ?.split(".")[0];
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -355,7 +360,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password -refreshToken");
 
-  await deleteFromCloudinary(oldAvatarPublicId);
+  if (oldAvatarPublicId) {
+    await deleteFromCloudinary(oldAvatarPublicId);
+  }
 
   return res
     .status(200)
@@ -377,10 +384,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   // TODO: Create a utility to delete old cover image from cloudinary
   const oldCoverImage = await User.findById(req.user?._id).select("coverImage");
-  const oldCoverImagePublicId = await oldCoverImage
-    .split("/")
-    .pop()
-    .split(".")[0];
+  const oldCoverImagePublicId = await oldCoverImage?.coverImage
+    ?.split("/")
+    ?.pop()
+    ?.split(".")[0];
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -392,7 +399,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password -refreshToken");
 
-  await deleteFromCloudinary(oldCoverImagePublicId);
+  if (oldCoverImagePublicId) {
+    await deleteFromCloudinary(oldCoverImagePublicId);
+  }
 
   return res
     .status(200)
@@ -401,6 +410,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
+  // console.log(username);
 
   if (!username?.trim()) {
     throw new ApiError(400, "Username is missing.");
@@ -463,6 +473,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
+  // console.log(channel);
 
   if (!channel?.length) {
     throw new ApiError(404, "Channel does not exists.");

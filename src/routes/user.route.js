@@ -50,6 +50,7 @@ router
   .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
 // when using params need to use /: and /c used below is on us we can use anything we want e.g, /channel/:username
+// username must be same in controller and route
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
 router.route("/watch-history").get(verifyJWT, getWatchHistory);
 
