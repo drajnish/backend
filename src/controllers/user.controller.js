@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -410,7 +411,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
-  // console.log(username);
 
   if (!username?.trim()) {
     throw new ApiError(400, "Username is missing.");
@@ -544,8 +544,11 @@ const getWatchHistory = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, user[0].watchHistory),
-      "Watch history fetched successfully."
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch history fetched successfully."
+      )
     );
 });
 
