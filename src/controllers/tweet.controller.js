@@ -23,6 +23,8 @@ const createTweet = asyncHandler(async (req, res) => {
     owner: ownerId,
   });
 
+  // TODO: send likes as well in response
+
   const createdTweet = await Tweet.findById(tweet._id)
     .populate("owner", "fullName userName avatar")
     .select("content owner createdAt");
@@ -87,6 +89,8 @@ const getUserTweet = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid user id format.");
   }
 
+  // TODO: get likes as well for every tweet
+
   const userTweets = await User.aggregate([
     {
       $match: {
@@ -131,4 +135,60 @@ const getUserTweet = asyncHandler(async (req, res) => {
     );
 });
 
-export { createTweet, getUserTweet };
+const updateTweet = asyncHandler(async (req, res) => {
+  const { content } = req.body;
+  const { tweetId } = req.params;
+
+  if (!tweetId) {
+    throw new ApiError(400, "No tweet selected.");
+  }
+
+  if (!isValidObjectId(tweetId)) {
+    throw new ApiError(400, "Invalid tweet id format.");
+  }
+
+  if (!content) {
+    throw new ApiError(400, "Tweet content is missing.");
+  }
+
+  const userId = await Tweet.findById(tweetId).select("owner");
+
+  // .equals() is method provided by Mongoose's ObjectId.
+  // This method allows you to safely compare two ObjectId instances or strings.
+  if (!userId.owner.equals(req.user?._id)) {
+    throw new ApiError(401, "Unauthorized request.");
+  }
+
+  const tweet = await Tweet.findByIdAndUpdate(
+    tweetId,
+    {
+      $set: {
+        content,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tweet, "Tweet updated successfully."));
+});
+
+const deleteTweet = asyncHandler(async (req, res) => {
+  const { tweetId } = req.params;
+  // console.log(tweetId);
+
+  const deletedTweet = Tweet.findByIdAndDelete(tweetId);
+
+  if (!deletedTweet) {
+    throw new ApiError(404, "Tweet not found.");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Tweet deleted successfully."));
+});
+
+export { createTweet, getUserTweet, updateTweet, deleteTweet };
