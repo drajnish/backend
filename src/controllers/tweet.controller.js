@@ -23,51 +23,52 @@ const createTweet = asyncHandler(async (req, res) => {
     owner: ownerId,
   });
 
-  // TODO: send likes as well in response
+  // const createdTweet = await Tweet.findById(tweet._id)
+  //   .populate("owner", "fullName userName avatar")
+  //   .select("content owner createdAt");
 
-  const createdTweet = await Tweet.findById(tweet._id)
-    .populate("owner", "fullName userName avatar")
-    .select("content owner createdAt");
-
-  // using aggregation just for practice
-  // const createdTweet = await Tweet.aggregate([
-  //   {
-  //     $match: {
-  //       _id: tweet._id,
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "users",
-  //       foreignField: "_id",
-  //       localField: "owner",
-  //       as: "ownerDetail",
-  //       pipeline: [
-  //         {
-  //           $project: {
-  //             fullName: 1,
-  //             userName: 1,
-  //             avatar: 1,
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     $addFields: {
-  //       ownerDetail: {
-  //         $first: "$ownerDetail",
-  //       },
-  //     },
-  //   },
-  //   {
-  //     $project: {
-  //       content: 1,
-  //       ownerDetail: 1,
-  //       createdAt: 1,
-  //     },
-  //   },
-  // ]);
+  // using aggregation
+  const createdTweet = await Tweet.aggregate([
+    {
+      $match: {
+        _id: tweet._id,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        foreignField: "_id",
+        localField: "owner",
+        as: "ownerDetail",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              userName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        ownerDetail: {
+          $first: "$ownerDetail",
+        },
+        totalLikes: 0,
+      },
+    },
+    {
+      $project: {
+        content: 1,
+        ownerDetail: 1,
+        createdAt: 1,
+        totalLikes: 1,
+        totalComments: 1,
+      },
+    },
+  ]);
 
   if (!createdTweet) {
     throw new ApiError(500, "Something went wrong while posting tweet.");
@@ -75,7 +76,7 @@ const createTweet = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, createdTweet, "Tweet posted successfully."));
+    .json(new ApiResponse(200, createdTweet[0], "Tweet posted successfully."));
 });
 
 const getUserTweet = asyncHandler(async (req, res) => {
@@ -88,8 +89,6 @@ const getUserTweet = asyncHandler(async (req, res) => {
   if (!isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid user id format.");
   }
-
-  // TODO: get likes as well for every tweet
 
   const userTweets = await User.aggregate([
     {
@@ -105,8 +104,24 @@ const getUserTweet = asyncHandler(async (req, res) => {
         as: "tweets",
         pipeline: [
           {
+            $lookup: {
+              from: "likes",
+              foreignField: "tweet",
+              localField: "_id",
+              as: "likes",
+            },
+          },
+          {
+            $addFields: {
+              totalLikes: {
+                $size: "$likes",
+              },
+            },
+          },
+          {
             $project: {
               content: 1,
+              totalLikes: 1,
               createdAt: 1,
               updatedAt: 1,
             },
