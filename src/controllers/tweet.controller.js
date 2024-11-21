@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Tweet } from "../models/tweet.model.js";
+import { Like } from "../models/like.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createTweet = asyncHandler(async (req, res) => {
@@ -170,7 +171,7 @@ const updateTweet = asyncHandler(async (req, res) => {
 
   // .equals() is method provided by Mongoose's ObjectId.
   // This method allows you to safely compare two ObjectId instances or strings.
-  if (!userId.owner.equals(req.user?._id)) {
+  if (!userId?.owner.equals(req.user?._id)) {
     throw new ApiError(401, "Unauthorized request.");
   }
 
@@ -193,9 +194,20 @@ const updateTweet = asyncHandler(async (req, res) => {
 
 const deleteTweet = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
-  // console.log(tweetId);
+  const userId = req.user?._id;
 
-  const deletedTweet = Tweet.findByIdAndDelete(tweetId);
+  const tweetOwner = await Tweet.findById(tweetId).select("owner");
+
+  // checks if the tweet posted by same user who is loggedin then only he is auhorized to delete the tweet
+  if (!tweetOwner && !userId.equals(tweetOwner?.owner)) {
+    throw new ApiError(401, "Unauthorized request.");
+  }
+
+  const deletedTweet = await Tweet.findByIdAndDelete(tweetId);
+  await Like.deleteOne({
+    tweet: tweetId,
+    likedBy: userId,
+  });
 
   if (!deletedTweet) {
     throw new ApiError(404, "Tweet not found.");
