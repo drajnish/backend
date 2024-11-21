@@ -29,11 +29,13 @@ app.use(cookieParser());
 // routes import
 import userRouter from "./routes/user.route.js";
 import tweetRouter from "./routes/tweet.route.js";
+import likeRouter from "./routes/like.route.js";
 
 // routes declaration
 // here we cannot use app.get() because we seperate the routes and controllers so we need middleware
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tweets", tweetRouter);
+app.use("/api/v1/likes", likeRouter);
 
 // http://localhost:8000/api/v1/users/register
 export { app };
