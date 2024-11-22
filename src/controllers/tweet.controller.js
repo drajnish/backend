@@ -167,6 +167,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Tweet content is missing.");
   }
 
+  // check alternative method of checking if owner and loggedIn user id is same in videoController -> updateVideo
   const userId = await Tweet.findById(tweetId).select("owner");
 
   // .equals() is method provided by Mongoose's ObjectId.
