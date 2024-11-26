@@ -27,14 +27,18 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-const deleteFromCloudinary = async (oldImagPublicId) => {
+const deleteFromCloudinary = async (oldImagPublicId, resourceType = "auto") => {
   try {
     if (!oldImagPublicId) return null;
 
-    const response = await cloudinary.uploader.destroy(oldImagPublicId);
+    const response = await cloudinary.uploader.destroy(oldImagPublicId, {
+      resource_type: resourceType,
+    });
 
+    console.log("Cloudinary Delete Response:", response);
     return response;
   } catch (error) {
+    console.error("Error deleting from Cloudinary:", error);
     return null;
   }
 };

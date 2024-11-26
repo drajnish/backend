@@ -343,7 +343,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while uploading avatar.");
   }
 
-  // TODO: Create a utility to delete lold avatar image from cloudinary
+  // Create a utility to delete old avatar image from cloudinary
   const oldAvatar = await User.findById(req.user?._id).select("avatar");
 
   const oldAvatarPublicId = await oldAvatar?.avatar
