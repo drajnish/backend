@@ -416,4 +416,75 @@ const deleteVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, deleteVideo, "Video deleted successfully."));
 });
 
-export { getAllVideos, publishAVideo, getVideoById, updateVideo, deleteVideo };
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req?.params;
+
+  if (!videoId) {
+    throw new ApiError(400, "Video id required.");
+  }
+
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video id format.");
+  }
+
+  const checkUserAndVideo = await Video.findOne({
+    _id: videoId,
+    owner: req?.user?._id,
+  });
+
+  if (!checkUserAndVideo) {
+    throw new ApiError(
+      400,
+      "Video not found or You are not authorized to change the publish status of this video."
+    );
+  }
+
+  const perviousPublishedStatus = checkUserAndVideo.isPublished;
+
+  checkUserAndVideo.isPublished = !perviousPublishedStatus;
+
+  const togglePublish = await checkUserAndVideo.save();
+
+  // const togglePublish = await Video.findByIdAndUpdate(
+  //   videoId,
+  //   {
+  //     $set: {
+  //       isPublished: {
+  //         $not: "$isPublished", //Toggle the isPublished value
+  //       },
+  //     },
+  //   },
+  //   {
+  //     new: true,
+  //     fields: {
+  //       isPublished: 1, // Optionally select only the 'isPublished' field
+  //     },
+  //   }
+  // );
+
+  if (!togglePublish) {
+    throw new ApiError(
+      500,
+      "Something went wrong while changing isPublished status."
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        201,
+        togglePublish,
+        "isPublished status changed successfully."
+      )
+    );
+});
+
+export {
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+};
