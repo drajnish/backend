@@ -86,7 +86,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  //TODO: get all liked videos
+  //get all liked videos
   const userId = req?.user?._id;
 
   if (!userId) {
