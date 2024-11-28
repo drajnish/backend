@@ -14,7 +14,7 @@ import { Comment } from "../models/comment.model.js";
 const getAllVideos = asyncHandler(async (req, res) => {
   const {
     page = 1,
-    limit = 3,
+    limit = 10,
     query,
     sortBy = "createdAt",
     sortType = "desc",
@@ -75,32 +75,16 @@ const getAllVideos = asyncHandler(async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "likes",
-          foreignField: "video",
-          localField: "_id",
-          as: "likes",
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          foreignField: "video",
-          localField: "_id",
-          as: "comments",
-        },
-      },
-      {
-        $addFields: {
-          publisher: {
-            $first: "$publisher",
-          },
-          totalLikes: {
-            $size: "$likes",
-          },
-          totalComments: {
-            $size: "$comments",
-          },
+        $project: {
+          videoFile: 1,
+          thumbnail: 1,
+          title: 1,
+          description: 1,
+          duration: 1,
+          views: 1,
+          publisher: 1,
+          createdAt: 1,
+          updatedAt: 1,
         },
       },
       {
@@ -234,6 +218,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     {
       $match: {
         _id: new mongoose.Types.ObjectId(videoId),
+        // isPublished: true,
       },
     },
     {
@@ -267,6 +252,52 @@ const getVideoById = asyncHandler(async (req, res) => {
         foreignField: "video",
         localField: "_id",
         as: "comments",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              foreignField: "_id",
+              localField: "owner",
+              as: "commentOwner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    userName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "likes",
+              foreignField: "comment",
+              localField: "_id",
+              as: "likesForComment",
+            },
+          },
+          {
+            $addFields: {
+              commentOwner: {
+                $first: "$commentOwner",
+              },
+              totalLikesForComment: {
+                $size: "$likesForComment",
+              },
+            },
+          },
+          {
+            $project: {
+              content: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              commentOwner: 1,
+              totalLikesForComment: 1,
+            },
+          },
+        ],
       },
     },
     {
@@ -282,9 +313,25 @@ const getVideoById = asyncHandler(async (req, res) => {
         },
       },
     },
+    {
+      $project: {
+        videoFile: 1,
+        thumbnail: 1,
+        title: 1,
+        description: 1,
+        duration: 1,
+        views: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        ownerDetail: 1,
+        comments: 1,
+        totalLikes: 1,
+        totalComments: 1,
+      },
+    },
   ]);
 
-  if (!video) {
+  if (video.length < 1) {
     throw new ApiError(401, "No video found!");
   }
 
