@@ -51,6 +51,45 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   }
 });
 
+const toggleCommentLike = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  const userId = req.user?._id;
+
+  if (!commentId) {
+    throw new ApiError(400, "Tweet id is missing.");
+  }
+
+  if (!isValidObjectId(commentId)) {
+    throw new ApiError(400, "Invalid tweet id format.");
+  }
+
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user id format.");
+  }
+
+  const existingCommentLike = await Like.findOne({
+    comment: commentId,
+    likedBy: userId,
+  });
+
+  if (!existingCommentLike) {
+    await Like.create({
+      comment: commentId,
+      likedBy: userId,
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(201, "Comment liked successfully."));
+  } else {
+    await Like.findByIdAndDelete(existingCommentLike._id);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(201, "Comment like removed successfully."));
+  }
+});
+
 const toggleTweetLike = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
   const userId = req.user?._id;
@@ -116,4 +155,4 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     );
 });
 
-export { toggleTweetLike, toggleVideoLike, getLikedVideos };
+export { toggleTweetLike, toggleCommentLike, toggleVideoLike, getLikedVideos };
