@@ -35,6 +35,7 @@ import subscriptionRouter from "./routes/subscription.route.js";
 import playlistRouter from "./routes/playlist.route.js";
 import healthcheckRouter from "./routes/healthcheck.route.js";
 import commentRouter from "./routes/comment.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
 
 // routes declaration
 // here we cannot use app.get() because we seperate the routes and controllers so we need middleware
@@ -46,6 +47,7 @@ app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
 
 // http://localhost:8000/api/v1/users/register
 export { app };

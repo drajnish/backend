@@ -31,6 +31,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
       $regex: query,
       $options: "i", //it tells that the check is case-insesitive by default it is case-sensitive
     },
+    isPublished: true,
   };
 
   // this is conditional if not provided userId then it will return all the videos available in db
@@ -218,7 +219,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     {
       $match: {
         _id: new mongoose.Types.ObjectId(videoId),
-        // isPublished: true,
+        isPublished: true,
       },
     },
     {
