@@ -13,6 +13,9 @@ import jwt from "jsonwebtoken";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
+    /**If the user is found, user will be a `Mongoose Document instance` representing that user,
+     * containing all the fields and methods defined in the User model.
+     * If no user is found with the provided userId, user will be null. */
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();

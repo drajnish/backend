@@ -7,7 +7,9 @@ This is a repo of learning backend with javascript from chai and code (Hitesh Ch
 - Whenever we have to use middleware or configure something then we use 'app.use()'
   e.g, app.use(cors())
 
-  - .use() is a method used to define middleware functions that can intercept requests and perform actions before passing control to the next middleware or the route handler.
+  - use() is a method which runs function/middleware or configure just after matching of any route defined with the requested URL and after that other operations performed based on how it is defined.
+
+  - use() is a method used to define middleware functions that can intercept requests and perform actions before passing control to the next middleware or the route handler.
 
     - **Global Middleware**: When you use .use() without specifying a route, it will apply the middleware to all incoming requests.
     - **Route-Specific Middleware**: You can also pass a route path as the first argument to .use(), making the middleware apply only to requests that match that path.

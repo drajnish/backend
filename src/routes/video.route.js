@@ -30,11 +30,15 @@ router.route("/").post(
   publishAVideo
 );
 
-router.route("/:videoId").get(getVideoById);
+router
+  .route("/:videoId")
+  .get(getVideoById)
+  .patch(upload.single("thumbnail"), updateVideo)
+  .delete(deleteVideo);
 
-router.route("/:videoId").patch(upload.single("thumbnail"), updateVideo);
+// router.route("/:videoId").patch(upload.single("thumbnail"), updateVideo);
 
-router.route("/:videoId").delete(deleteVideo);
+// router.route("/:videoId").delete(deleteVideo);
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 

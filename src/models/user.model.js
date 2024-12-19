@@ -27,7 +27,6 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String, // cloudinary url
-      required: true,
     },
     coverImage: {
       type: String,
@@ -50,6 +49,8 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("save", async function (next) {
+  // isModified() method is a Mongoose instance method that
+  // checks whether a specific field in the document has been modified.
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
